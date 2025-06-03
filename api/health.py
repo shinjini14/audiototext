@@ -1,12 +1,16 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+import json
 
-app = FastAPI()
-
-@app.get("/")
-def health():
-    return {"status": "healthy", "message": "AudioToText API is running"}
-
-# Vercel handler
+# Simple health check for Vercel
 def handler(request):
-    return health()
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "body": json.dumps({
+            "status": "healthy",
+            "message": "AudioToText API is running",
+            "timestamp": "2025-01-04"
+        })
+    }
