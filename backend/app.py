@@ -9,13 +9,16 @@ from dotenv import load_dotenv
 import assemblyai as aai
 
 # -----------------------------------
-# 1. Load ASSEMBLYAI_API_KEY from .env
+# 1. Load ASSEMBLYAI_API_KEY from environment
 # -----------------------------------
-load_dotenv()  # backend/.env must contain ASSEMBLYAI_API_KEY=your_key
+# Try to load from .env file (for local development)
+load_dotenv()
+
+# Get API key from environment variables (works for both local .env and Railway)
 api_key = os.getenv("ASSEMBLYAI_API_KEY")
 if not api_key:
     raise RuntimeError(
-        "ERROR: Please set ASSEMBLYAI_API_KEY in backend/.env and restart."
+        "ERROR: Please set ASSEMBLYAI_API_KEY environment variable."
     )
 
 # ------------------------------
