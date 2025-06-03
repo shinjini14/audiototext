@@ -1,13 +1,5 @@
-from http.server import BaseHTTPRequestHandler
-
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-
-        html = """<!DOCTYPE html>
+def handler(request):
+    html = """<!DOCTYPE html>
 <html>
 <head>
     <title>AudioToText API</title>
@@ -47,4 +39,11 @@ class handler(BaseHTTPRequestHandler):
 </body>
 </html>"""
 
-        self.wfile.write(html.encode())
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "text/html",
+            "Access-Control-Allow-Origin": "*"
+        },
+        "body": html
+    }
