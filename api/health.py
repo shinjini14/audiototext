@@ -1,16 +1,16 @@
+from http.server import BaseHTTPRequestHandler
 import json
 
-# Simple health check for Vercel
-def handler(request):
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-        },
-        "body": json.dumps({
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+
+        response = {
             "status": "healthy",
-            "message": "AudioToText API is running",
-            "timestamp": "2025-01-04"
-        })
-    }
+            "message": "AudioToText API is running"
+        }
+
+        self.wfile.write(json.dumps(response).encode())
