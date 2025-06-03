@@ -26,7 +26,13 @@ aai.settings.api_key = api_key
 # ------------------------------
 # 3. Create FastAPI app & configure CORS
 # ------------------------------
-app = FastAPI(title="AssemblyAI Transcription API (Local)")
+app = FastAPI(
+    title="AudioToText API",
+    description="AI-powered audio transcription service using AssemblyAI",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
 origins = [
     "http://localhost:3000",   # frontend
