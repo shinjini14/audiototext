@@ -4,23 +4,20 @@ Simple startup script for Railway deployment
 """
 
 import os
-import sys
-import uvicorn
-
-# Add the backend directory to Python path
-backend_path = os.path.join(os.path.dirname(__file__), 'backend')
-sys.path.insert(0, backend_path)
-
-# Change working directory to backend
-os.chdir(backend_path)
+import subprocess
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
+    port = os.environ.get("PORT", "8000")
     print(f"Starting server on port {port}")
-    print(f"Working directory: {os.getcwd()}")
-    print(f"Python path: {sys.path[:3]}")
+    print(f"Current directory: {os.getcwd()}")
 
-    # Import the app from the current directory (backend)
-    from app import app
+    # Use subprocess to run uvicorn with proper port handling
+    cmd = [
+        "python", "-m", "uvicorn",
+        "backend.app:app",
+        "--host", "0.0.0.0",
+        "--port", str(port)
+    ]
 
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+    print(f"Running command: {' '.join(cmd)}")
+    subprocess.run(cmd)
