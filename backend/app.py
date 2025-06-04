@@ -125,32 +125,83 @@ async def root():
 
 @app.get("/languages")
 async def get_supported_languages():
-    """Get list of supported languages for transcription."""
+    """Get list of ALL supported languages for transcription, including ALL Indian languages."""
     return {
         "supported_languages": {
+            # Auto Detection
             "auto": "Automatic Detection",
-            "en": "English",
+
+            # Major Indian Languages (Official Languages of India)
             "hi": "Hindi (हिन्दी)",
-            "ta": "Tamil (தமிழ்)",
-            "te": "Telugu (తెలుగు)",
             "bn": "Bengali (বাংলা)",
+            "te": "Telugu (తెలుగు)",
+            "mr": "Marathi (मराठी)",
+            "ta": "Tamil (தமிழ்)",
+            "ur": "Urdu (اردو)",
             "gu": "Gujarati (ગુજરાતી)",
             "kn": "Kannada (ಕನ್ನಡ)",
             "ml": "Malayalam (മലയാളം)",
-            "mr": "Marathi (मराठी)",
-            "pa": "Punjabi (ਪੰਜਾਬੀ)",
-            "ur": "Urdu (اردو)",
-            "as": "Assamese (অসমীয়া)",
             "or": "Odia (ଓଡ଼ିଆ)",
-            "sa": "Sanskrit (संस्कृत)",
+            "pa": "Punjabi (ਪੰਜਾਬੀ)",
+            "as": "Assamese (অসমীয়া)",
+            "mai": "Maithili (मैथिली)",
+            "mag": "Magahi (मगही)",
+            "bho": "Bhojpuri (भोजपुरी)",
+            "new": "Newari (नेवारी)",
+            "gom": "Konkani (कोंकणी)",
+            "sd": "Sindhi (سنڌي)",
             "ne": "Nepali (नेपाली)",
+            "sa": "Sanskrit (संस्कृत)",
+
+            # Regional Indian Languages
+            "ks": "Kashmiri (कॉशुर)",
+            "doi": "Dogri (डोगरी)",
+            "mni": "Manipuri (মৈতৈলোন্)",
+            "sat": "Santali (ᱥᱟᱱᱛᱟᱲᱤ)",
+            "bo": "Tibetan (བོད་སྐད་)",
+            "dv": "Dhivehi (ދިވެހި)",
             "si": "Sinhala (සිංහල)",
+
+            # Dravidian Languages
+            "tcy": "Tulu (ತುಳು)",
+            "kod": "Kodava (କୋଡ଼ବା)",
+
+            # Indo-Aryan Languages
+            "raj": "Rajasthani (राजस्थानी)",
+            "bpy": "Bishnupriya (বিষ্ণুপ্রিয়া)",
+            "bh": "Bihari (बिहारी)",
+            "awa": "Awadhi (अवधी)",
+            "braj": "Braj (ब्रज)",
+            "hne": "Chhattisgarhi (छत्तीसगढ़ी)",
+            "gju": "Gujari (गुर्जरी)",
+            "kha": "Khasi (খাসি)",
+            "lus": "Mizo (Mizo ṭawng)",
+            "mnc": "Manchu (ᠮᠠᠨᠵᡠ)",
+
+            # Austro-Asiatic Languages
+            "ho": "Ho (𑣸𑣉)",
+            "kru": "Kurukh (कुड़ुख़)",
+            "sck": "Sadri (सादरी)",
+
+            # Tibeto-Burman Languages
+            "lep": "Lepcha (ᰛᰩᰵ)",
+            "rab": "Rabha (রাভা)",
+            "grt": "Garo (আ·চিক)",
+            "njo": "Ao (আও)",
+
+            # Other South Asian Languages
+            "dz": "Dzongkha (རྫོང་ཁ)",
             "my": "Myanmar (မြန်မာ)",
             "th": "Thai (ไทย)",
+            "lo": "Lao (ລາວ)",
+            "km": "Khmer (ខ្មែរ)",
             "vi": "Vietnamese (Tiếng Việt)",
-            "ko": "Korean (한국어)",
-            "ja": "Japanese (日本語)",
+
+            # International Languages
+            "en": "English",
             "zh": "Chinese (中文)",
+            "ja": "Japanese (日本語)",
+            "ko": "Korean (한국어)",
             "ar": "Arabic (العربية)",
             "fa": "Persian (فارسی)",
             "tr": "Turkish (Türkçe)",
@@ -160,14 +211,109 @@ async def get_supported_languages():
             "es": "Spanish (Español)",
             "pt": "Portuguese (Português)",
             "it": "Italian (Italiano)",
-            "nl": "Dutch (Nederlands)"
+            "nl": "Dutch (Nederlands)",
+            "sv": "Swedish (Svenska)",
+            "da": "Danish (Dansk)",
+            "no": "Norwegian (Norsk)",
+            "fi": "Finnish (Suomi)",
+            "pl": "Polish (Polski)",
+            "cs": "Czech (Čeština)",
+            "sk": "Slovak (Slovenčina)",
+            "hu": "Hungarian (Magyar)",
+            "ro": "Romanian (Română)",
+            "bg": "Bulgarian (Български)",
+            "hr": "Croatian (Hrvatski)",
+            "sr": "Serbian (Српски)",
+            "sl": "Slovenian (Slovenščina)",
+            "et": "Estonian (Eesti)",
+            "lv": "Latvian (Latviešu)",
+            "lt": "Lithuanian (Lietuvių)",
+            "mt": "Maltese (Malti)",
+            "ga": "Irish (Gaeilge)",
+            "cy": "Welsh (Cymraeg)",
+            "eu": "Basque (Euskera)",
+            "ca": "Catalan (Català)",
+            "gl": "Galician (Galego)",
+            "is": "Icelandic (Íslenska)",
+            "mk": "Macedonian (Македонски)",
+            "sq": "Albanian (Shqip)",
+            "he": "Hebrew (עברית)",
+            "yi": "Yiddish (ייִדיש)",
+            "am": "Amharic (አማርኛ)",
+            "ti": "Tigrinya (ትግርኛ)",
+            "om": "Oromo (Afaan Oromoo)",
+            "so": "Somali (Soomaali)",
+            "sw": "Swahili (Kiswahili)",
+            "zu": "Zulu (isiZulu)",
+            "xh": "Xhosa (isiXhosa)",
+            "af": "Afrikaans",
+            "ms": "Malay (Bahasa Melayu)",
+            "id": "Indonesian (Bahasa Indonesia)",
+            "tl": "Filipino (Tagalog)",
+            "haw": "Hawaiian (ʻŌlelo Hawaiʻi)"
+        },
+        "indian_languages": {
+            "constitutional_languages": {
+                "description": "22 Official Languages of India as per 8th Schedule of Constitution",
+                "languages": {
+                    "hi": "Hindi (हिन्दी)",
+                    "bn": "Bengali (বাংলা)",
+                    "te": "Telugu (తెలుగు)",
+                    "mr": "Marathi (मराठी)",
+                    "ta": "Tamil (தமிழ்)",
+                    "ur": "Urdu (اردو)",
+                    "gu": "Gujarati (ગુજરાતી)",
+                    "kn": "Kannada (ಕನ್ನಡ)",
+                    "ml": "Malayalam (മലയാളം)",
+                    "or": "Odia (ଓଡ଼ିଆ)",
+                    "pa": "Punjabi (ਪੰਜਾਬੀ)",
+                    "as": "Assamese (অসমীয়া)",
+                    "mai": "Maithili (मैथिली)",
+                    "sa": "Sanskrit (संस्कृत)",
+                    "ne": "Nepali (नेपाली)",
+                    "ks": "Kashmiri (कॉशुर)",
+                    "sd": "Sindhi (سنڌي)",
+                    "gom": "Konkani (कोंकणी)",
+                    "doi": "Dogri (डोगरी)",
+                    "mni": "Manipuri (মৈতৈলোন্)",
+                    "sat": "Santali (ᱥᱟᱱᱛᱟᱲᱤ)",
+                    "bo": "Bodo (बड़ो)"
+                }
+            },
+            "regional_languages": {
+                "description": "Major Regional Languages of India",
+                "languages": {
+                    "bho": "Bhojpuri (भोजपुरी)",
+                    "mag": "Magahi (मगही)",
+                    "new": "Newari (नेवारी)",
+                    "raj": "Rajasthani (राजस्थानी)",
+                    "tcy": "Tulu (ತುಳು)",
+                    "kod": "Kodava (କୋଡ଼ବା)",
+                    "bpy": "Bishnupriya (বিষ্ণুপ্রিয়া)",
+                    "awa": "Awadhi (अवधी)",
+                    "braj": "Braj (ब्रज)",
+                    "hne": "Chhattisgarhi (छत्तीसगढ़ी)",
+                    "kha": "Khasi (খাসি)",
+                    "lus": "Mizo (Mizo ṭawng)",
+                    "ho": "Ho (𑣸𑣉)",
+                    "kru": "Kurukh (कुड़ुख़)",
+                    "lep": "Lepcha (ᰛᰩᰵ)",
+                    "grt": "Garo (আ·চিক)"
+                }
+            }
         },
         "usage": {
             "auto_detection": "Leave language_code empty for automatic detection",
-            "manual_specification": "Provide language_code parameter (e.g., 'hi' for Hindi)",
-            "indian_languages_supported": [
-                "hi", "ta", "te", "bn", "gu", "kn", "ml", "mr", "pa", "ur", "as", "or", "sa", "ne"
-            ]
+            "manual_specification": "Provide language_code parameter (e.g., 'hi' for Hindi, 'ta' for Tamil)",
+            "total_languages": "100+ languages supported",
+            "indian_languages_count": "40+ Indian languages supported",
+            "examples": {
+                "auto_detect": "No language_code parameter",
+                "hindi": "language_code=hi",
+                "tamil": "language_code=ta",
+                "bengali": "language_code=bn",
+                "telugu": "language_code=te"
+            }
         }
     }
 
@@ -177,7 +323,7 @@ async def get_supported_languages():
 @app.post("/transcribe-url", response_model=TranscriptionResponse)
 async def transcribe_url(
     audio_url: str = Form(...),
-    language_code: str = Form(None, description="Optional: Specify language code (e.g., 'hi', 'ta', 'te', 'bn', 'gu', 'kn', 'ml', 'mr', 'pa', 'ur') or leave empty for auto-detection")
+    language_code: str = Form(None, description="Optional: Specify language code (e.g., 'hi', 'ta', 'te', 'bn', 'gu', 'kn', 'ml', 'mr', 'pa', 'ur', 'as', 'or', 'mai', 'bho', 'raj', 'new', etc.) or leave empty for auto-detection. See /languages for full list.")
 ):
     """
     Accept a public audio URL, submit to AssemblyAI with language detection, and return:
@@ -245,7 +391,7 @@ async def transcribe_url(
 @app.post("/transcribe-file", response_model=TranscriptionResponse)
 async def transcribe_file(
     file: UploadFile = File(...),
-    language_code: str = Form(None, description="Optional: Specify language code (e.g., 'hi', 'ta', 'te', 'bn', 'gu', 'kn', 'ml', 'mr', 'pa', 'ur') or leave empty for auto-detection")
+    language_code: str = Form(None, description="Optional: Specify language code (e.g., 'hi', 'ta', 'te', 'bn', 'gu', 'kn', 'ml', 'mr', 'pa', 'ur', 'as', 'or', 'mai', 'bho', 'raj', 'new', etc.) or leave empty for auto-detection. See /languages for full list.")
 ):
     """
     Accept an uploaded audio file with language detection, save temporarily, upload to AssemblyAI,

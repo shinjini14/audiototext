@@ -1,7 +1,7 @@
 services:
   - type: web
     name: audiototext-api
-    runtime: python
+    env: python
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app:app --host 0.0.0.0 --port $PORT"
     plan: free
@@ -11,4 +11,3 @@ services:
         value: 3.11.0
       - key: ASSEMBLYAI_API_KEY
         value: c050c9bad17d4de885b6e8a23d2445ff
-        sync: false

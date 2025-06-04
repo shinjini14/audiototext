@@ -13,7 +13,7 @@
 ## ✨ Features
 
 - 🌍 **Multi-Language Support** - Automatic language detection and transcription
-- 🇮🇳 **Indian Languages** - Hindi, Tamil, Telugu, Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Urdu, and more
+- 🇮🇳 **ALL Indian Languages** - 40+ Indian languages including all 22 constitutional languages and major regional languages
 - 🎵 **Audio URL Transcription** - Submit public audio URLs for transcription
 - 📁 **File Upload** - Upload audio files directly (MP3, WAV, M4A, MP4, WebM, FLAC)
 - 🔍 **Language Detection** - Automatic detection or manual specification
@@ -78,19 +78,60 @@ language_code: hi  # Optional: specify language or leave empty for auto-detectio
 ```
 
 ### Supported Language Codes
+
+#### 🇮🇳 Constitutional Languages of India (22 Official Languages)
 - **Auto-detection**: Leave `language_code` empty
 - **Hindi**: `hi` - हिन्दी
-- **Tamil**: `ta` - தமிழ்
-- **Telugu**: `te` - తెలుగు
 - **Bengali**: `bn` - বাংলা
+- **Telugu**: `te` - తెలుగు
+- **Marathi**: `mr` - मराठी
+- **Tamil**: `ta` - தமিழ்
+- **Urdu**: `ur` - اردو
 - **Gujarati**: `gu` - ગુજરાતી
 - **Kannada**: `kn` - ಕನ್ನಡ
 - **Malayalam**: `ml` - മലയാളം
-- **Marathi**: `mr` - मराठी
+- **Odia**: `or` - ଓଡ଼ିଆ
 - **Punjabi**: `pa` - ਪੰਜਾਬੀ
-- **Urdu**: `ur` - اردو
+- **Assamese**: `as` - অসমীয়া
+- **Maithili**: `mai` - मैथिली
+- **Sanskrit**: `sa` - संस्कृत
+- **Nepali**: `ne` - नेपाली
+- **Kashmiri**: `ks` - कॉशुर
+- **Sindhi**: `sd` - سنڌي
+- **Konkani**: `gom` - कोंकणी
+- **Dogri**: `doi` - डोगरी
+- **Manipuri**: `mni` - মৈতৈলোন্
+- **Santali**: `sat` - ᱥᱟᱱᱛᱟᱲᱤ
+- **Bodo**: `bo` - बड़ो
+
+#### 🏞️ Major Regional Languages
+- **Bhojpuri**: `bho` - भोजपुरी
+- **Magahi**: `mag` - मगही
+- **Newari**: `new` - नेवारी
+- **Rajasthani**: `raj` - राजस्थानी
+- **Tulu**: `tcy` - ತುಳು
+- **Awadhi**: `awa` - अवधी
+- **Chhattisgarhi**: `hne` - छत्तीसगढ़ी
+- **Khasi**: `kha` - খাসি
+- **Mizo**: `lus` - Mizo ṭawng
+- **Ho**: `ho` - 𑣸𑣉
+- **Kurukh**: `kru` - कुड़ुख़
+- **Lepcha**: `lep` - ᰛᰩᰵ
+- **Garo**: `grt` - আ·চিক
+
+#### 🌍 International Languages
 - **English**: `en` - English
-- And many more... (see `/languages` endpoint)
+- **Chinese**: `zh` - 中文
+- **Arabic**: `ar` - العربية
+- **Spanish**: `es` - Español
+- **French**: `fr` - Français
+- **German**: `de` - Deutsch
+- **Russian**: `ru` - Русский
+- **Japanese**: `ja` - 日本語
+- **Korean**: `ko` - 한국어
+- **And 60+ more languages...**
+
+**📋 Complete List**: Visit `/languages` endpoint for all 100+ supported languages
 
 ## 💻 Local Development
 

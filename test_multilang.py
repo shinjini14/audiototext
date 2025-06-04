@@ -4,7 +4,6 @@ Test multi-language support for AudioToText API
 """
 
 import requests
-import json
 
 # Use your live Render URL
 BASE_URL = "https://audiototext-z5j7.onrender.com"
@@ -20,11 +19,20 @@ def test_supported_languages():
             print("✅ Supported languages endpoint working!")
             print(f"📋 Total languages supported: {len(data['supported_languages'])}")
             
-            print("\n🇮🇳 Indian languages supported:")
-            indian_langs = data['usage']['indian_languages_supported']
-            for lang_code in indian_langs:
-                lang_name = data['supported_languages'].get(lang_code, lang_code)
+            print("\n🇮🇳 Constitutional Languages of India (22 Official):")
+            constitutional = data['indian_languages']['constitutional_languages']['languages']
+            for lang_code, lang_name in list(constitutional.items())[:10]:  # Show first 10
                 print(f"   {lang_code}: {lang_name}")
+            print(f"   ... and {len(constitutional)-10} more constitutional languages")
+
+            print("\n🏞️ Regional Languages of India:")
+            regional = data['indian_languages']['regional_languages']['languages']
+            for lang_code, lang_name in list(regional.items())[:8]:  # Show first 8
+                print(f"   {lang_code}: {lang_name}")
+            print(f"   ... and {len(regional)-8} more regional languages")
+
+            print(f"\n📊 Total Indian languages: {len(constitutional) + len(regional)}")
+            print(f"📊 Total languages supported: {len(data['supported_languages'])}")
             
             return True
         else:
