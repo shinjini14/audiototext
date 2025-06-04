@@ -343,13 +343,19 @@ async def transcribe_url(
     - Urdu (ur)
     - And many more...
     """
-    # 1. Configure transcription with language detection
+    # 1. Configure transcription with multi-language detection
     try:
         config = aai.TranscriptionConfig(
             language_detection=True if not language_code else False,
             language_code=language_code if language_code else None,
             punctuate=True,
-            format_text=True
+            format_text=True,
+            speaker_labels=True,  # Enable speaker diarization
+            auto_chapters=True,   # Enable chapter detection
+            sentiment_analysis=True,  # Enable sentiment analysis
+            entity_detection=True,   # Enable entity detection
+            word_boost=["Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Malayalam", "Marathi", "Punjabi", "Urdu"],  # Boost Indian language recognition
+            boost_param="high"
         )
 
         transcriber = aai.Transcriber(config=config)
@@ -361,7 +367,7 @@ async def transcribe_url(
     # 2. Wait for completion
     transcript = _get_completed_transcription(transcript_id)
 
-    # 3. Build enhanced response with language info
+    # 3. Build enhanced response with multi-language info
     transcript_text = transcript.text or ""
     words = transcript.words or []
     word_count = len(words) if words else None
@@ -369,6 +375,61 @@ async def transcribe_url(
     # Get detected language info
     detected_language = getattr(transcript, 'language_code', 'en')
     language_confidence = getattr(transcript, 'language_confidence', None)
+
+    # Extract multi-language segments
+    language_segments = []
+    if words:
+        current_segment = {"language": None, "text": "", "start": None, "end": None, "confidence": None}
+
+        for word in words:
+            word_lang = getattr(word, 'language_code', detected_language)
+            word_confidence = getattr(word, 'confidence', 0.0)
+
+            if current_segment["language"] != word_lang:
+                # Save previous segment if it exists
+                if current_segment["text"].strip():
+                    language_segments.append(current_segment.copy())
+
+                # Start new segment
+                current_segment = {
+                    "language": word_lang,
+                    "text": word.text + " ",
+                    "start": word.start,
+                    "end": word.end,
+                    "confidence": word_confidence
+                }
+            else:
+                # Continue current segment
+                current_segment["text"] += word.text + " "
+                current_segment["end"] = word.end
+                current_segment["confidence"] = max(current_segment["confidence"] or 0, word_confidence)
+
+        # Add final segment
+        if current_segment["text"].strip():
+            language_segments.append(current_segment)
+
+    # Get speaker information if available
+    speakers = []
+    if hasattr(transcript, 'utterances') and transcript.utterances:
+        for utterance in transcript.utterances:
+            speakers.append({
+                "speaker": utterance.speaker,
+                "text": utterance.text,
+                "start": utterance.start,
+                "end": utterance.end,
+                "confidence": utterance.confidence
+            })
+
+    # Get chapters if available
+    chapters = []
+    if hasattr(transcript, 'chapters') and transcript.chapters:
+        for chapter in transcript.chapters:
+            chapters.append({
+                "summary": chapter.summary,
+                "headline": chapter.headline,
+                "start": chapter.start,
+                "end": chapter.end
+            })
 
     metadata = {
         "transcription_id": transcript_id,
@@ -380,7 +441,12 @@ async def transcribe_url(
         "language_confidence": language_confidence,
         "requested_language": language_code,
         "audio_duration": getattr(transcript, 'audio_duration', None),
-        "language_detection_enabled": True if not language_code else False
+        "language_detection_enabled": True if not language_code else False,
+        "multi_language_segments": language_segments,
+        "total_languages_detected": len(set(seg["language"] for seg in language_segments)),
+        "speakers": speakers,
+        "chapters": chapters,
+        "languages_found": list(set(seg["language"] for seg in language_segments))
     }
     return TranscriptionResponse(transcript=transcript_text, metadata=metadata)
 
@@ -422,13 +488,19 @@ async def transcribe_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not save temp file: {e}")
 
-    # 3. Submit transcription job with language detection
+    # 3. Submit transcription job with multi-language detection
     try:
         config = aai.TranscriptionConfig(
             language_detection=True if not language_code else False,
             language_code=language_code if language_code else None,
             punctuate=True,
-            format_text=True
+            format_text=True,
+            speaker_labels=True,  # Enable speaker diarization
+            auto_chapters=True,   # Enable chapter detection
+            sentiment_analysis=True,  # Enable sentiment analysis
+            entity_detection=True,   # Enable entity detection
+            word_boost=["Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Malayalam", "Marathi", "Punjabi", "Urdu"],  # Boost Indian language recognition
+            boost_param="high"
         )
 
         transcriber = aai.Transcriber(config=config)
@@ -450,7 +522,7 @@ async def transcribe_file(
     # 6. Wait for completion
     transcript = _get_completed_transcription(transcript_id)
 
-    # 7. Build enhanced response with language info
+    # 7. Build enhanced response with multi-language info
     transcript_text = transcript.text or ""
     words = transcript.words or []
     word_count = len(words) if words else None
@@ -458,6 +530,61 @@ async def transcribe_file(
     # Get detected language info
     detected_language = getattr(transcript, 'language_code', 'en')
     language_confidence = getattr(transcript, 'language_confidence', None)
+
+    # Extract multi-language segments
+    language_segments = []
+    if words:
+        current_segment = {"language": None, "text": "", "start": None, "end": None, "confidence": None}
+
+        for word in words:
+            word_lang = getattr(word, 'language_code', detected_language)
+            word_confidence = getattr(word, 'confidence', 0.0)
+
+            if current_segment["language"] != word_lang:
+                # Save previous segment if it exists
+                if current_segment["text"].strip():
+                    language_segments.append(current_segment.copy())
+
+                # Start new segment
+                current_segment = {
+                    "language": word_lang,
+                    "text": word.text + " ",
+                    "start": word.start,
+                    "end": word.end,
+                    "confidence": word_confidence
+                }
+            else:
+                # Continue current segment
+                current_segment["text"] += word.text + " "
+                current_segment["end"] = word.end
+                current_segment["confidence"] = max(current_segment["confidence"] or 0, word_confidence)
+
+        # Add final segment
+        if current_segment["text"].strip():
+            language_segments.append(current_segment)
+
+    # Get speaker information if available
+    speakers = []
+    if hasattr(transcript, 'utterances') and transcript.utterances:
+        for utterance in transcript.utterances:
+            speakers.append({
+                "speaker": utterance.speaker,
+                "text": utterance.text,
+                "start": utterance.start,
+                "end": utterance.end,
+                "confidence": utterance.confidence
+            })
+
+    # Get chapters if available
+    chapters = []
+    if hasattr(transcript, 'chapters') and transcript.chapters:
+        for chapter in transcript.chapters:
+            chapters.append({
+                "summary": chapter.summary,
+                "headline": chapter.headline,
+                "start": chapter.start,
+                "end": chapter.end
+            })
 
     metadata = {
         "transcription_id": transcript_id,
@@ -469,6 +596,11 @@ async def transcribe_file(
         "language_confidence": language_confidence,
         "requested_language": language_code,
         "audio_duration": getattr(transcript, 'audio_duration', None),
-        "language_detection_enabled": True if not language_code else False
+        "language_detection_enabled": True if not language_code else False,
+        "multi_language_segments": language_segments,
+        "total_languages_detected": len(set(seg["language"] for seg in language_segments)),
+        "speakers": speakers,
+        "chapters": chapters,
+        "languages_found": list(set(seg["language"] for seg in language_segments))
     }
     return TranscriptionResponse(transcript=transcript_text, metadata=metadata)
