@@ -10,4 +10,5 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: ASSEMBLYAI_API_KEY
+        value: c050c9bad17d4de885b6e8a23d2445ff
         sync: false
