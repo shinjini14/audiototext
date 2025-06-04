@@ -1,5 +1,5 @@
 # Ignore files that might trigger Docker builds
-Dockerfile*
+# Dockerfile*  # Allow Dockerfile for Docker deployment
 docker-compose*
 .dockerignore
 

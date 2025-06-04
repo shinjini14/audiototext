@@ -1,13 +1,9 @@
 services:
   - type: web
     name: audiototext-api
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app:app --host 0.0.0.0 --port $PORT"
+    runtime: docker
     plan: free
     healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
       - key: ASSEMBLYAI_API_KEY
         value: c050c9bad17d4de885b6e8a23d2445ff
