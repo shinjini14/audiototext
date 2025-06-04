@@ -343,19 +343,24 @@ async def transcribe_url(
     - Urdu (ur)
     - And many more...
     """
-    # 1. Configure transcription with multi-language detection
+    # 1. Configure transcription with AssemblyAI's multi-language feature (beta)
     try:
         config = aai.TranscriptionConfig(
-            language_detection=True if not language_code else False,
-            language_code=language_code if language_code else None,
+            # Use multi-language detection (beta feature)
+            language_detection=True,
+            multichannel=False,  # Set to True if audio has multiple channels
             punctuate=True,
             format_text=True,
             speaker_labels=True,  # Enable speaker diarization
             auto_chapters=True,   # Enable chapter detection
-            sentiment_analysis=True,  # Enable sentiment analysis
-            entity_detection=True,   # Enable entity detection
-            word_boost=["Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Malayalam", "Marathi", "Punjabi", "Urdu"],  # Boost Indian language recognition
-            boost_param="high"
+            sentiment_analysis=False,  # Disable for better performance
+            entity_detection=False,   # Disable for better performance
+            # Boost Indian languages for better recognition
+            word_boost=["Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Malayalam", "Marathi", "Punjabi", "Urdu", "Assamese", "Odia", "Nepali", "Sanskrit"],
+            boost_param="high",
+            # Enable language detection for each word/segment
+            language_code=None,  # Let AssemblyAI auto-detect all languages
+            dual_channel=False
         )
 
         transcriber = aai.Transcriber(config=config)
@@ -376,37 +381,54 @@ async def transcribe_url(
     detected_language = getattr(transcript, 'language_code', 'en')
     language_confidence = getattr(transcript, 'language_confidence', None)
 
-    # Extract multi-language segments
+    # Extract multi-language segments using AssemblyAI's language detection
     language_segments = []
     if words:
-        current_segment = {"language": None, "text": "", "start": None, "end": None, "confidence": None}
+        current_segment = {"language": None, "text": "", "start": None, "end": None, "confidence": None, "word_count": 0}
 
         for word in words:
-            word_lang = getattr(word, 'language_code', detected_language)
+            # AssemblyAI provides language_code for each word in multi-language transcription
+            word_lang = getattr(word, 'language_code', detected_language) or detected_language
             word_confidence = getattr(word, 'confidence', 0.0)
+            word_text = getattr(word, 'text', '')
 
             if current_segment["language"] != word_lang:
                 # Save previous segment if it exists
                 if current_segment["text"].strip():
+                    current_segment["text"] = current_segment["text"].strip()
                     language_segments.append(current_segment.copy())
 
                 # Start new segment
                 current_segment = {
                     "language": word_lang,
-                    "text": word.text + " ",
+                    "text": word_text + " ",
                     "start": word.start,
                     "end": word.end,
-                    "confidence": word_confidence
+                    "confidence": word_confidence,
+                    "word_count": 1
                 }
             else:
                 # Continue current segment
-                current_segment["text"] += word.text + " "
+                current_segment["text"] += word_text + " "
                 current_segment["end"] = word.end
                 current_segment["confidence"] = max(current_segment["confidence"] or 0, word_confidence)
+                current_segment["word_count"] += 1
 
         # Add final segment
         if current_segment["text"].strip():
+            current_segment["text"] = current_segment["text"].strip()
             language_segments.append(current_segment)
+
+    # Get language detection results from AssemblyAI
+    language_detection_results = []
+    if hasattr(transcript, 'language_detection') and transcript.language_detection:
+        for detection in transcript.language_detection:
+            language_detection_results.append({
+                "language": detection.language,
+                "confidence": detection.confidence,
+                "start": detection.start,
+                "end": detection.end
+            })
 
     # Get speaker information if available
     speakers = []
@@ -441,12 +463,15 @@ async def transcribe_url(
         "language_confidence": language_confidence,
         "requested_language": language_code,
         "audio_duration": getattr(transcript, 'audio_duration', None),
-        "language_detection_enabled": True if not language_code else False,
+        "language_detection_enabled": True,
         "multi_language_segments": language_segments,
-        "total_languages_detected": len(set(seg["language"] for seg in language_segments)),
+        "total_languages_detected": len(set(seg["language"] for seg in language_segments)) if language_segments else 1,
         "speakers": speakers,
         "chapters": chapters,
-        "languages_found": list(set(seg["language"] for seg in language_segments))
+        "languages_found": list(set(seg["language"] for seg in language_segments)) if language_segments else [detected_language],
+        "language_detection_results": language_detection_results,
+        "multilingual_transcription": True,
+        "feature_used": "AssemblyAI Multi-Language Transcription (Beta)"
     }
     return TranscriptionResponse(transcript=transcript_text, metadata=metadata)
 
@@ -488,19 +513,24 @@ async def transcribe_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not save temp file: {e}")
 
-    # 3. Submit transcription job with multi-language detection
+    # 3. Submit transcription job with AssemblyAI's multi-language feature (beta)
     try:
         config = aai.TranscriptionConfig(
-            language_detection=True if not language_code else False,
-            language_code=language_code if language_code else None,
+            # Use multi-language detection (beta feature)
+            language_detection=True,
+            multichannel=False,  # Set to True if audio has multiple channels
             punctuate=True,
             format_text=True,
             speaker_labels=True,  # Enable speaker diarization
             auto_chapters=True,   # Enable chapter detection
-            sentiment_analysis=True,  # Enable sentiment analysis
-            entity_detection=True,   # Enable entity detection
-            word_boost=["Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Malayalam", "Marathi", "Punjabi", "Urdu"],  # Boost Indian language recognition
-            boost_param="high"
+            sentiment_analysis=False,  # Disable for better performance
+            entity_detection=False,   # Disable for better performance
+            # Boost Indian languages for better recognition
+            word_boost=["Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada", "Malayalam", "Marathi", "Punjabi", "Urdu", "Assamese", "Odia", "Nepali", "Sanskrit"],
+            boost_param="high",
+            # Enable language detection for each word/segment
+            language_code=None,  # Let AssemblyAI auto-detect all languages
+            dual_channel=False
         )
 
         transcriber = aai.Transcriber(config=config)
@@ -531,37 +561,54 @@ async def transcribe_file(
     detected_language = getattr(transcript, 'language_code', 'en')
     language_confidence = getattr(transcript, 'language_confidence', None)
 
-    # Extract multi-language segments
+    # Extract multi-language segments using AssemblyAI's language detection
     language_segments = []
     if words:
-        current_segment = {"language": None, "text": "", "start": None, "end": None, "confidence": None}
+        current_segment = {"language": None, "text": "", "start": None, "end": None, "confidence": None, "word_count": 0}
 
         for word in words:
-            word_lang = getattr(word, 'language_code', detected_language)
+            # AssemblyAI provides language_code for each word in multi-language transcription
+            word_lang = getattr(word, 'language_code', detected_language) or detected_language
             word_confidence = getattr(word, 'confidence', 0.0)
+            word_text = getattr(word, 'text', '')
 
             if current_segment["language"] != word_lang:
                 # Save previous segment if it exists
                 if current_segment["text"].strip():
+                    current_segment["text"] = current_segment["text"].strip()
                     language_segments.append(current_segment.copy())
 
                 # Start new segment
                 current_segment = {
                     "language": word_lang,
-                    "text": word.text + " ",
+                    "text": word_text + " ",
                     "start": word.start,
                     "end": word.end,
-                    "confidence": word_confidence
+                    "confidence": word_confidence,
+                    "word_count": 1
                 }
             else:
                 # Continue current segment
-                current_segment["text"] += word.text + " "
+                current_segment["text"] += word_text + " "
                 current_segment["end"] = word.end
                 current_segment["confidence"] = max(current_segment["confidence"] or 0, word_confidence)
+                current_segment["word_count"] += 1
 
         # Add final segment
         if current_segment["text"].strip():
+            current_segment["text"] = current_segment["text"].strip()
             language_segments.append(current_segment)
+
+    # Get language detection results from AssemblyAI
+    language_detection_results = []
+    if hasattr(transcript, 'language_detection') and transcript.language_detection:
+        for detection in transcript.language_detection:
+            language_detection_results.append({
+                "language": detection.language,
+                "confidence": detection.confidence,
+                "start": detection.start,
+                "end": detection.end
+            })
 
     # Get speaker information if available
     speakers = []
@@ -604,3 +651,229 @@ async def transcribe_file(
         "languages_found": list(set(seg["language"] for seg in language_segments))
     }
     return TranscriptionResponse(transcript=transcript_text, metadata=metadata)
+
+
+# -----------------------------------
+# 9. POST /transcribe-multilang (NEW: Dedicated Multi-Language Endpoint)
+# -----------------------------------
+@app.post("/transcribe-multilang", response_model=TranscriptionResponse)
+async def transcribe_multilang_url(
+    audio_url: str = Form(..., description="Public URL of the audio file to transcribe"),
+    enable_speaker_labels: bool = Form(True, description="Enable speaker diarization"),
+    enable_chapters: bool = Form(True, description="Enable auto-chapter generation")
+):
+    """
+    🌍 **Multi-Language Transcription Endpoint**
+
+    Uses AssemblyAI's dedicated multi-language transcription feature (beta) to detect and transcribe
+    multiple languages within a single audio file with high accuracy.
+
+    **Features:**
+    - Automatic detection of multiple languages in single audio
+    - Word-level language detection
+    - Speaker diarization (who spoke when)
+    - Auto-chapter generation
+    - Timestamp information for each language segment
+    - Enhanced accuracy for Indian languages
+
+    **Supported Languages:**
+    - All 40+ Indian languages (Hindi, Tamil, Telugu, Bengali, etc.)
+    - 100+ international languages
+    - Automatic detection - no manual specification needed
+
+    **Returns:**
+    - Full transcript with mixed languages
+    - Language segments with timestamps
+    - Speaker information
+    - Chapter summaries
+    - Language confidence scores
+    """
+
+    # Configure AssemblyAI for optimal multi-language detection
+    try:
+        config = aai.TranscriptionConfig(
+            # Core multi-language settings
+            language_detection=True,  # Enable automatic language detection
+            language_code=None,       # Don't specify - let AI detect all languages
+
+            # Enhanced features
+            speaker_labels=enable_speaker_labels,  # Who spoke when
+            auto_chapters=enable_chapters,         # Auto-generate chapters
+
+            # Text formatting
+            punctuate=True,
+            format_text=True,
+
+            # Performance optimizations
+            sentiment_analysis=False,  # Disable for faster processing
+            entity_detection=False,    # Disable for faster processing
+
+            # Indian language boost for better accuracy
+            word_boost=[
+                "Hindi", "Tamil", "Telugu", "Bengali", "Gujarati", "Kannada",
+                "Malayalam", "Marathi", "Punjabi", "Urdu", "Assamese", "Odia",
+                "Nepali", "Sanskrit", "Bhojpuri", "Maithili", "Rajasthani"
+            ],
+            boost_param="high"
+        )
+
+        # Submit transcription
+        transcriber = aai.Transcriber(config=config)
+        transcript_request = transcriber.submit(audio_url)
+        transcript_id = transcript_request.id
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AssemblyAI submission error: {e}")
+
+    # Wait for completion
+    transcript = _get_completed_transcription(transcript_id)
+
+    # Process results
+    transcript_text = transcript.text or ""
+    words = transcript.words or []
+
+    # Extract language segments with improved logic
+    language_segments = []
+    if words:
+        current_segment = {
+            "language": None,
+            "language_name": None,
+            "text": "",
+            "start_time": None,
+            "end_time": None,
+            "confidence": 0.0,
+            "word_count": 0
+        }
+
+        for word in words:
+            word_lang = getattr(word, 'language_code', 'en') or 'en'
+            word_confidence = getattr(word, 'confidence', 0.0)
+            word_text = getattr(word, 'text', '')
+
+            # Get language name from our supported languages
+            lang_name = _get_language_name(word_lang)
+
+            if current_segment["language"] != word_lang:
+                # Save previous segment
+                if current_segment["text"].strip():
+                    current_segment["text"] = current_segment["text"].strip()
+                    language_segments.append(current_segment.copy())
+
+                # Start new segment
+                current_segment = {
+                    "language": word_lang,
+                    "language_name": lang_name,
+                    "text": word_text + " ",
+                    "start_time": word.start / 1000.0,  # Convert to seconds
+                    "end_time": word.end / 1000.0,
+                    "confidence": word_confidence,
+                    "word_count": 1
+                }
+            else:
+                # Continue current segment
+                current_segment["text"] += word_text + " "
+                current_segment["end_time"] = word.end / 1000.0
+                current_segment["confidence"] = max(current_segment["confidence"], word_confidence)
+                current_segment["word_count"] += 1
+
+        # Add final segment
+        if current_segment["text"].strip():
+            current_segment["text"] = current_segment["text"].strip()
+            language_segments.append(current_segment)
+
+    # Get speakers
+    speakers = []
+    if hasattr(transcript, 'utterances') and transcript.utterances:
+        for utterance in transcript.utterances:
+            speakers.append({
+                "speaker": utterance.speaker,
+                "text": utterance.text,
+                "start_time": utterance.start / 1000.0,
+                "end_time": utterance.end / 1000.0,
+                "confidence": utterance.confidence
+            })
+
+    # Get chapters
+    chapters = []
+    if hasattr(transcript, 'chapters') and transcript.chapters:
+        for chapter in transcript.chapters:
+            chapters.append({
+                "title": chapter.headline,
+                "summary": chapter.summary,
+                "start_time": chapter.start / 1000.0,
+                "end_time": chapter.end / 1000.0
+            })
+
+    # Build comprehensive metadata
+    languages_found = list(set(seg["language"] for seg in language_segments))
+    language_names_found = list(set(seg["language_name"] for seg in language_segments))
+
+    metadata = {
+        "transcription_id": transcript_id,
+        "audio_url": audio_url,
+        "status": str(transcript.status),
+        "processing_time": getattr(transcript, 'audio_duration', 0),
+
+        # Language detection results
+        "multilingual_detection": {
+            "total_languages_detected": len(languages_found),
+            "languages_found": languages_found,
+            "language_names_found": language_names_found,
+            "primary_language": getattr(transcript, 'language_code', 'en'),
+            "language_confidence": getattr(transcript, 'language_confidence', None)
+        },
+
+        # Segments and speakers
+        "language_segments": language_segments,
+        "total_segments": len(language_segments),
+        "speakers": speakers,
+        "total_speakers": len(set(s["speaker"] for s in speakers)) if speakers else 0,
+        "chapters": chapters,
+        "total_chapters": len(chapters),
+
+        # Statistics
+        "word_count": len(words),
+        "confidence": transcript.confidence,
+        "audio_duration_seconds": getattr(transcript, 'audio_duration', 0),
+
+        # Feature info
+        "features_used": {
+            "multi_language_detection": True,
+            "speaker_diarization": enable_speaker_labels,
+            "auto_chapters": enable_chapters,
+            "indian_language_boost": True,
+            "api_version": "AssemblyAI Multi-Language (Beta)"
+        }
+    }
+
+    return TranscriptionResponse(transcript=transcript_text, metadata=metadata)
+
+
+def _get_language_name(lang_code: str) -> str:
+    """Get human-readable language name from language code."""
+    language_names = {
+        "hi": "Hindi (हिन्दी)",
+        "bn": "Bengali (বাংলা)",
+        "te": "Telugu (తెలుగు)",
+        "ta": "Tamil (தமிழ்)",
+        "mr": "Marathi (मराठी)",
+        "ur": "Urdu (اردو)",
+        "gu": "Gujarati (ગુજરાતી)",
+        "kn": "Kannada (ಕನ್ನಡ)",
+        "ml": "Malayalam (മലയാളം)",
+        "pa": "Punjabi (ਪੰਜਾਬੀ)",
+        "as": "Assamese (অসমীয়া)",
+        "or": "Odia (ଓଡ଼ିଆ)",
+        "ne": "Nepali (नेपाली)",
+        "sa": "Sanskrit (संस्कृत)",
+        "en": "English",
+        "zh": "Chinese (中文)",
+        "ar": "Arabic (العربية)",
+        "es": "Spanish (Español)",
+        "fr": "French (Français)",
+        "de": "German (Deutsch)",
+        "ja": "Japanese (日本語)",
+        "ko": "Korean (한국어)",
+        "ru": "Russian (Русский)"
+    }
+    return language_names.get(lang_code, f"Language ({lang_code})")

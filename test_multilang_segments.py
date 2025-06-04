@@ -4,28 +4,31 @@ Test multi-language segment detection in AudioToText API
 """
 
 import requests
-import json
 
 # Use your live Render URL
 BASE_URL = "https://audiototext-z5j7.onrender.com"
 
 def test_multi_language_detection():
-    """Test multi-language detection in a single audio file."""
-    print("🌍 Testing Multi-Language Detection in Single Audio File")
+    """Test AssemblyAI's dedicated multi-language detection endpoint."""
+    print("🌍 Testing AssemblyAI Multi-Language Detection (Beta)")
     print(f"🌐 Base URL: {BASE_URL}")
     print("=" * 70)
-    
+
     # Sample audio URL (replace with actual multi-language audio)
     audio_url = "https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
-    
+
     print("🎵 Testing with sample audio...")
     print(f"📎 Audio URL: {audio_url}")
-    
+
     try:
-        print("\n📤 Sending transcription request...")
+        print("\n📤 Sending multi-language transcription request...")
         response = requests.post(
-            f"{BASE_URL}/transcribe-url",
-            data={"audio_url": audio_url},
+            f"{BASE_URL}/transcribe-multilang",
+            data={
+                "audio_url": audio_url,
+                "enable_speaker_labels": True,
+                "enable_chapters": True
+            },
             timeout=300  # 5 minutes
         )
         
@@ -39,34 +42,39 @@ def test_multi_language_detection():
             
             # Display language detection results
             metadata = result['metadata']
-            print(f"\n🔍 Language Detection Results:")
-            print(f"   Primary Language: {metadata.get('detected_language', 'N/A')}")
-            print(f"   Language Confidence: {metadata.get('language_confidence', 'N/A')}")
-            print(f"   Total Languages Found: {metadata.get('total_languages_detected', 0)}")
-            print(f"   Languages List: {metadata.get('languages_found', [])}")
-            
+            multilingual = metadata.get('multilingual_detection', {})
+
+            print(f"\n🔍 Multi-Language Detection Results:")
+            print(f"   Primary Language: {multilingual.get('primary_language', 'N/A')}")
+            print(f"   Language Confidence: {multilingual.get('language_confidence', 'N/A')}")
+            print(f"   Total Languages Found: {multilingual.get('total_languages_detected', 0)}")
+            print(f"   Languages: {multilingual.get('languages_found', [])}")
+            print(f"   Language Names: {multilingual.get('language_names_found', [])}")
+
             # Display multi-language segments
-            segments = metadata.get('multi_language_segments', [])
+            segments = metadata.get('language_segments', [])
             if segments:
-                print(f"\n🌍 Multi-Language Segments ({len(segments)} segments):")
+                print(f"\n🌍 Language Segments ({len(segments)} segments):")
                 for i, segment in enumerate(segments[:5]):  # Show first 5 segments
-                    lang = segment.get('language', 'unknown')
+                    lang_name = segment.get('language_name', 'Unknown')
                     text = segment.get('text', '').strip()
-                    start = segment.get('start', 0) / 1000  # Convert to seconds
-                    end = segment.get('end', 0) / 1000
+                    start = segment.get('start_time', 0)
+                    end = segment.get('end_time', 0)
                     confidence = segment.get('confidence', 0)
-                    
+                    word_count = segment.get('word_count', 0)
+
                     print(f"   Segment {i+1}:")
-                    print(f"     Language: {lang}")
+                    print(f"     Language: {lang_name}")
                     print(f"     Time: {start:.1f}s - {end:.1f}s")
+                    print(f"     Words: {word_count}")
                     print(f"     Confidence: {confidence:.2f}")
                     print(f"     Text: {text[:100]}...")
                     print()
-                
+
                 if len(segments) > 5:
                     print(f"   ... and {len(segments) - 5} more segments")
             else:
-                print("\n🔍 No language segments detected (single language audio)")
+                print("\n🔍 Single language detected (no language switching)")
             
             # Display speaker information
             speakers = metadata.get('speakers', [])
@@ -133,13 +141,19 @@ def main():
         print("   ✅ Timestamp information")
         
         print("\n🎯 Usage Examples:")
-        print("   # Test with your own multi-language audio:")
+        print("   # Multi-language transcription (recommended):")
+        print(f'   curl -X POST "{BASE_URL}/transcribe-multilang" \\')
+        print('     -d "audio_url=YOUR_MULTILANG_AUDIO_URL" \\')
+        print('     -d "enable_speaker_labels=true" \\')
+        print('     -d "enable_chapters=true"')
+
+        print("\n   # Standard transcription:")
         print(f'   curl -X POST "{BASE_URL}/transcribe-url" \\')
-        print('     -d "audio_url=YOUR_MULTILANG_AUDIO_URL"')
-        
+        print('     -d "audio_url=YOUR_AUDIO_URL"')
+
         print("\n   # Upload a file:")
         print(f'   curl -X POST "{BASE_URL}/transcribe-file" \\')
-        print('     -F "file=@your_multilang_audio.mp3"')
+        print('     -F "file=@your_audio.mp3"')
         
     else:
         print("❌ Multi-Language Detection Test Failed")
