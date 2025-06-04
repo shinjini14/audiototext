@@ -12,10 +12,13 @@
 
 ## ✨ Features
 
+- 🌍 **Multi-Language Support** - Automatic language detection and transcription
+- 🇮🇳 **Indian Languages** - Hindi, Tamil, Telugu, Bengali, Gujarati, Kannada, Malayalam, Marathi, Punjabi, Urdu, and more
 - 🎵 **Audio URL Transcription** - Submit public audio URLs for transcription
 - 📁 **File Upload** - Upload audio files directly (MP3, WAV, M4A, MP4, WebM, FLAC)
+- 🔍 **Language Detection** - Automatic detection or manual specification
 - 🚀 **Fast Processing** - Powered by AssemblyAI's advanced speech recognition
-- 📊 **Detailed Metadata** - Get word count, confidence scores, and more
+- 📊 **Detailed Metadata** - Get word count, confidence scores, language info, and more
 - 🌐 **REST API** - Easy integration with any application
 - 📖 **Interactive Docs** - Built-in Swagger UI documentation
 
@@ -27,10 +30,18 @@ Try the live API right now:
 # Test health check
 curl https://audiototext-z5j7.onrender.com/health
 
-# Transcribe sample audio
+# Get supported languages
+curl https://audiototext-z5j7.onrender.com/languages
+
+# Auto-detect language and transcribe
 curl -X POST "https://audiototext-z5j7.onrender.com/transcribe-url" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "audio_url=https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
+
+# Transcribe Hindi audio (specify language)
+curl -X POST "https://audiototext-z5j7.onrender.com/transcribe-url" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "audio_url=YOUR_HINDI_AUDIO_URL&language_code=hi"
 ```
 
 ## 📡 API Endpoints
@@ -40,21 +51,46 @@ curl -X POST "https://audiototext-z5j7.onrender.com/transcribe-url" \
 GET /health
 ```
 
-### Transcribe Audio URL
+### Get Supported Languages
+```bash
+GET /languages
+```
+
+### Transcribe Audio URL (Multi-Language)
 ```bash
 POST /transcribe-url
 Content-Type: application/x-www-form-urlencoded
 
+# Auto-detect language
 audio_url=https://example.com/audio.mp3
+
+# Or specify language
+audio_url=https://example.com/audio.mp3&language_code=hi
 ```
 
-### Upload Audio File
+### Upload Audio File (Multi-Language)
 ```bash
 POST /transcribe-file
 Content-Type: multipart/form-data
 
 file: <audio_file>
+language_code: hi  # Optional: specify language or leave empty for auto-detection
 ```
+
+### Supported Language Codes
+- **Auto-detection**: Leave `language_code` empty
+- **Hindi**: `hi` - हिन्दी
+- **Tamil**: `ta` - தமிழ்
+- **Telugu**: `te` - తెలుగు
+- **Bengali**: `bn` - বাংলা
+- **Gujarati**: `gu` - ગુજરાતી
+- **Kannada**: `kn` - ಕನ್ನಡ
+- **Malayalam**: `ml` - മലയാളം
+- **Marathi**: `mr` - मराठी
+- **Punjabi**: `pa` - ਪੰਜਾਬੀ
+- **Urdu**: `ur` - اردو
+- **English**: `en` - English
+- And many more... (see `/languages` endpoint)
 
 ## 💻 Local Development
 
